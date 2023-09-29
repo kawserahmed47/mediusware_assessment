@@ -22,66 +22,102 @@
             }
         </style>
     </head>
-    <body >
-
-        <div class="container">
+    <body class="antialiased">
+       <div class="container">
             <div class="card">
                 <div class="card-header">
-                    <h1>Welcome to user dashboard!</h1>
+                    <h1>Create New User</h1>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h1>Name: {{Auth::user()->name}}</h1>
-                            <p>Email: {{Auth::user()->email}}</p>
+                    <form id="create-user-form" method="post" action="{{route('users.store')}}">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="from-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" name="name" class="form-control" id="name" />
+                                    <small class="error error-name text-danger"></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="from-group">
+                                    <label for="account_type">Account Type</label>
+                                    <select name="account_type" class="form-control" id="account_type">
+                                        <option value="individual">Individual</option>
+                                        <option value="business">Business</option>
+                                    </select>
+                                    <small class="error error-account_type text-danger"></small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <h1>Balance: {{Auth::user()->balance}}</h1>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="from-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" name="email" class="form-control" id="email" />
+                                    <small class="error error-email text-danger"></small>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="from-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" name="password" class="form-control" id="password" />
+                                    <small class="error error-password text-danger"></small>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="from-group">
+                                    <label for="password_confirmation">Confirm Password</label>
+                                    <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" />
+                                    <small class="error error-password_confirmation text-danger"></small>
+
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-success">Submit</button>
+                                <a href="{{route('login.index')}}" class="btn btn-info">Alrady have an account?</a>
 
-            <div class="card">
-                <div class="card-header">
-                        <h1>Transaction History</h1>
-                        <a href="{{route('deposit.index')}}" class="btn btn-success">Deposit</a>
-                        <a href="{{route('withdraw.index')}}" class="btn btn-info">Withdraw</a>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <td>ID</td>
-                                    <td>Type</td>
-                                    <td>Amount</td>
-                                    <td>Fee</td>
-                                    <td>Total Amount</td>
-                                    <td>Date</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (count($transactions))
-                                    @foreach ($transactions as $transaction)
-                                        <tr>
-                                            <td>{{$transaction->id}}</td>
-                                            <td>{{Str::camel($transaction->type)}}</td>
-                                            <td>{{$transaction->amount}}</td>
-                                            <td>{{$transaction->fee}}</td>
-                                            <td>{{$transaction->amount + $transaction->fee}}</td>
-                                            <td>{{date('d M, Y h:i:s', strtotime($transaction->date))}}</td>
-                                        </tr>
-                                    @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                        {!! $transactions->links() !!}
-
-                    </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
        </div>
-       
+       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+       <script>
+            $(document).on('submit', '#create-user-form', function(e){
+                e.preventDefault();
+                let _this = $(this);
+                $.ajax({
+                    type: _this.attr('method'),
+                    url: _this.attr('action'),
+                    data: _this.serialize(),
+                    beforeSend: function (){
+                        $('.error').text('');
+                        console.log("Saving...")
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                        location.href="{{route('login.index')}}";
+                        
+                    },
+                    error: function (xhr, status, errors) {
+                         let responseText = $.parseJSON(xhr.responseText);
+                         alert(responseText.message);
+                         $.each(responseText.errors, function (indexInArray, valueOfElement) { 
+                             $(".error-"+indexInArray).text(valueOfElement);
+                         });
+                    }
+                });
+            })
+       </script>
+
+
     </body>
 </html>
